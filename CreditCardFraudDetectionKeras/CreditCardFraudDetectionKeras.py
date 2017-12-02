@@ -5,12 +5,18 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from keras.utils.np_utils import to_categorical
+from sklearn.preprocessing import StandardScaler
 
 #Data setinin öznitelikleri çıkarılmış durumda
-#29 adet öznitelik var "Class" ise çıktı kısmı
+#30 adet öznitelik var "Class" ise çıktı kısmı
 
 #csv dosyasından verileri alıyoruz pandas kütüphanesi csv okumada işimize yarıyor
-veri = pd.read_csv('~/Desktop/creditcard.csv', header=0)
+veri = pd.read_csv('../input/creditcard.csv', header=0)
+#time bloğunu düşürüyoruz.
+veri = veri.drop(['Time'], axis=1)
+#amount bloğunu -1 ile 1 arasına çekiyoruz.
+veri['Amount'] = StandardScaler().fit_transform(veri['Amount'].values.reshape(-1, 1))
+
 #veriyi ayrı bir yere kopyalıyoruz
 veri_kopya = veri.copy()
 #Daha sonra girdi ve çıktıları ayıtıp düzenliyoruz 
@@ -26,7 +32,7 @@ X_train, X_test, y_train, y_test = train_test_split(girdiler, ciktilar, test_siz
 #Sequential bir model oluşturuyoruz.Üç katmanlı bir DNN kuruyoruz
 model = Sequential()
 #İlk katman 50 nöron içerecek ve aktivasyon fonksiyonu olarak relu kullanacağız
-model.add(Dense(50, input_dim=30, activation='relu'))
+model.add(Dense(50, input_dim=29, activation='relu'))
 #Hemen sonra dropout koyuyoruz böylece overfit'in önüne geçmeye çalışıyoruz
 model.add(Dropout(0.5))
 #Bir katman daha
@@ -50,5 +56,5 @@ model.fit(X_train, y_train,
 
 #Başarı durumunu hesaplayıp ekrana bastırıyoruz          
 basari = model.evaluate(X_test, y_test)
-print('Hata Toplami:', basari[0])
-print('Basari:', basari[1])
+print('Hata Toplami(LOSS):', basari[0])
+print('Basari(ACC):', basari[1])
